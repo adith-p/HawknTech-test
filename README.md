@@ -101,3 +101,4 @@ python manage.py seed
 ```bash
 python manage.py test core
 ```
+>>>>>>> 01f1dc4 (docs: postman collection)

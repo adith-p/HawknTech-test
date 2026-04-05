@@ -1,0 +1,430 @@
+{
+  "info": {
+    "_postman_id": "b5d6e589-762b-40d6-a55e-93ebc7e2d833",
+    "name": "HawkN Assessment API - adith_p",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "29540694",
+    "_collection_link": "https://go.postman.co/collection/29540694-b5d6e589-762b-40d6-a55e-93ebc7e2d833?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login — Obtain Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"admin1\",\n    \"password\": \"admin1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/token/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "token",
+                ""
+              ]
+            },
+            "description": "Obtain a JWT access and refresh token. Use admin1/admin1 or admin2/admin2 after running the seed command."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"refresh\": \"<your_refresh_token>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/token/refresh/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "token",
+                "refresh",
+                ""
+              ]
+            },
+            "description": "Refresh the access token using the refresh token from the login response."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Branches",
+      "item": [
+        {
+          "name": "List All Branches",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/branches/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "branches",
+                ""
+              ]
+            },
+            "description": "Returns a list of all branches. Any authenticated user can access this."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Stock Summary — By Branch ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/branches/7153c3f2-097d-4a08-8d8c-fd79b5dc08e5/stock-summary/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "branches",
+                "7153c3f2-097d-4a08-8d8c-fd79b5dc08e5",
+                "stock-summary",
+                ""
+              ]
+            },
+            "description": "Returns the stock summary for a specific branch. Replace the UUID in the URL with the branch ID from the List All Branches response."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transfers",
+      "item": [
+        {
+          "name": "List All Transfers",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transfers/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transfers",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "transfer_status",
+                  "value": "PENDING",
+                  "description": "Filter by status: PENDING, APPROVED, REJECTED",
+                  "disabled": true
+                },
+                {
+                  "key": "from_branch__code",
+                  "value": "",
+                  "description": "Filter by from_branch code e.g. BR123ABC",
+                  "disabled": true
+                },
+                {
+                  "key": "to_branch__code",
+                  "value": "",
+                  "description": "Filter by to_branch code e.g. BR456DEF",
+                  "disabled": true
+                },
+                {
+                  "key": "product__sku",
+                  "value": "",
+                  "description": "Filter by product SKU",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Returns a paginated list of all stock transfers. Supports filtering by status, branch code, and product SKU."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Transfer — REQUEST",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from_branch\": \"<from_branch_uuid>\",\n  \"to_branch\": \"<to_branch_uuid>\",\n  \"product_sku\": \"<product_sku>\",\n  \"quantity\": 10,\n  \"transfer_type\": \"REQUEST\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transfers/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transfers",
+                ""
+              ]
+            },
+            "description": "Create a REQUEST transfer. Must be authenticated as the admin of the to_branch. The admin of the from_branch will be responsible for approving."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Transfer — OFFER",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from_branch\": \"<from_branch_uuid>\",\n  \"to_branch\": \"<to_branch_uuid>\",\n  \"product_sku\": \"<product_sku>\",\n  \"quantity\": 10,\n  \"transfer_type\": \"OFFER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transfers/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transfers",
+                ""
+              ]
+            },
+            "description": "Create an OFFER transfer. Must be authenticated as the admin of the from_branch. The admin of the to_branch will be responsible for approving."
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Transfer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transfer_status\": \"APPROVED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transfers/<transfer_uuid>/approve/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transfers",
+                "<transfer_uuid>",
+                "approve",
+                ""
+              ]
+            },
+            "description": "Approve a pending transfer. Replace the UUID in the URL with the transfer ID. Transfer status must be PENDING. Accepted values: APPROVED, REJECTED."
+          },
+          "response": []
+        },
+        {
+          "name": "Reject Transfer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transfer_status\": \"REJECTED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transfers/<transfer_uuid>/approve/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "transfers",
+                "<transfer_uuid>",
+                "approve",
+                ""
+              ]
+            },
+            "description": "Reject a pending transfer. Same endpoint as approve — just change the transfer_status value to REJECTED."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "default",
+      "description": "Paste the access token from the Login response here"
+    }
+  ]
+}

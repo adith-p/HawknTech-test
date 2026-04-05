@@ -163,6 +163,8 @@ This change primarily affects the approval logic:
 
 - The assessment allowed React as an optional extra. I chose to invest my time in backend reliability – transactions, concurrency, tests, and API design – because that’s where the core business logic lives and where I can deliver the most value.
 
+- currently the system does not support idempotency via an explicit key or header, but it does handle it at the service layer through DB constraints and status checks. This is a trade-off that simplifies the implementation while still preventing duplicate operations.
+
 - **Expand the role model to three levels.** Right now we have two roles — `branch_admin`
   and `user`. Going forward I would introduce a third level, something like a global admin
   or a regional admin, who would have visibility and control across multiple branches rather
