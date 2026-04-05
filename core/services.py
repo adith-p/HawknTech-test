@@ -32,29 +32,37 @@ class StockTransferService:
             raise NotFound(detail="Stock transfer with this id does not exist.")
 
     @staticmethod
-    def create_transfer_entry(validated_data, requested_by):
+    def create_transfer_entry(validated_data, branch_admin):
+
+        to_branch = BranchService.get_branch_by_id(validated_data.get("to_branch"))
+        if to_branch.admin != branch_admin:
+            raise ValidationError(
+                detail=f"Only the admin of the {to_branch.code} can create a transfer request."
+            )
 
         from_branch = BranchService.get_branch_by_id(validated_data.get("from_branch"))
-        to_branch = BranchService.get_branch_by_id(validated_data.get("to_branch"))
         product = ProductService.get_product_by_sku(validated_data.get("product_sku"))
-
         with transaction.atomic():
             transfer_entry = StockTransfer.objects.create(
                 from_branch=from_branch,
                 to_branch=to_branch,
                 product=product,
                 quantity=validated_data.get("quantity"),
-                requested_by=requested_by,
+                requested_by=branch_admin,
             )
             return transfer_entry
 
     @staticmethod
-    def approve_transfer_entry(transfer_id, validated_data, approved_by):
+    def approve_transfer_entry(transfer_id, validated_data, branch_admin):
         transfer_entry = StockTransferService.get_transfer_by_id(transfer_id)
 
         with transaction.atomic():
-            transfer_entry.approved_by = approved_by
+            transfer_entry.approved_by = branch_admin
             transfer_entry.approved_at = timezone.now()
+            if transfer_entry.from_branch.admin != branch_admin:
+                raise ValidationError(
+                    detail=f"Only the admin of the {transfer_entry.from_branch.code} can approve or reject the transfer."
+                )
 
             if validated_data.get("transfer_status") == StockTransferStatus.REJECTED:
                 transfer_entry.transfer_status = StockTransferStatus.REJECTED

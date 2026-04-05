@@ -37,7 +37,6 @@ class CreateStockTransferSerializer(Serializer):
 
 
 class ApproveStockTransferSerializer(Serializer):
-    transfer_id = serializers.UUIDField()
     transfer_status = serializers.ChoiceField(
         choices=[StockTransferStatus.APPROVED, StockTransferStatus.REJECTED]
     )

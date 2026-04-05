@@ -14,6 +14,7 @@ from .services import StockTransferService
 from .utils import APIErrorResponse
 from .constants import StockTransferStatus
 from rest_framework.pagination import CursorPagination
+from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 
 
@@ -25,6 +26,7 @@ class StockTransferPagination(CursorPagination):
 
 
 class GetOrCreateTransferViewset(ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = StockTransfer.objects.select_related(
         "from_branch", "to_branch", "product", "requested_by", "approved_by"
     ).all()
@@ -70,6 +72,8 @@ class GetOrCreateTransferViewset(ModelViewSet):
 
 
 class ApproveTransferAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, id):
         try:
             serializer = ApproveStockTransferSerializer(data=request.data)
@@ -117,5 +121,7 @@ class ApproveTransferAPIView(APIView):
 
 
 class GetStockSummaryAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         pass
