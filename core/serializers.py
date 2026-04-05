@@ -14,9 +14,17 @@ class ProductSerializer(ModelSerializer):
 
 
 class BranchSerializer(ModelSerializer):
+    admin = serializers.CharField(source="admin.username")
+
     class Meta:
         model = Branch
         fields = ("code", "name", "admin")
+
+
+class BranchListSerializer(ModelSerializer):
+    class Meta:
+        model = Branch
+        fields = ("id", "code", "name")
 
 
 class CreateStockTransferSerializer(Serializer):
@@ -78,4 +86,5 @@ class StockTransferSerializer(ModelSerializer):
             "approved_by",
             "approved_at",
             "transfer_status",
+            "transfer_type",
         )

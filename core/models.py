@@ -129,7 +129,13 @@ class StockTransfer(TimestampedModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["from_branch", "to_branch", "product"],
+                fields=[
+                    "from_branch",
+                    "to_branch",
+                    "product",
+                    "transfer_type",
+                    "quantity",
+                ],
                 condition=models.Q(transfer_status=StockTransferStatus.PENDING),
                 name="unique_transfer_pending",
             )

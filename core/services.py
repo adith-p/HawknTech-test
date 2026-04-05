@@ -81,14 +81,13 @@ class StockTransferService:
         if transfer_type == TransferType.REQUEST:
             if transfer_entry.from_branch.admin != branch_admin:
                 raise ValidationError(
-                    detail=f"Only the admin of the {transfer_entry.from_branch.code} can approve a transfer request."
+                    detail=f"Only the admin of the {transfer_entry.from_branch.name} can approve a transfer request."
                 )
         if transfer_type == TransferType.OFFER:
             if transfer_entry.to_branch.admin != branch_admin:
                 raise ValidationError(
-                    detail=f"Only the admin of the {transfer_entry.to_branch.code} can approve a transfer offer."
+                    detail=f"Only the admin of the {transfer_entry.to_branch.name} can approve a transfer offer."
                 )
-
         if validated_data.get("transfer_status") == StockTransferStatus.REJECTED:
             transfer_entry.transfer_status = StockTransferStatus.REJECTED
             transfer_entry.save()

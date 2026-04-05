@@ -11,6 +11,8 @@ from .serializers import (
     ApproveStockTransferSerializer,
     StockTransferSerializer,
     StockSummarySerializer,
+    BranchSerializer,
+    BranchListSerializer,
 )
 from .services import StockTransferService, StockSummaryService
 from .utils import APIErrorResponse
@@ -126,7 +128,7 @@ class ApproveTransferAPIView(APIView):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 message=e.detail,
             )
-        except Exception as e:
+        except Exception:
             return APIErrorResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 message="An unexpected error occurred while processing the request.",
@@ -159,4 +161,24 @@ class GetStockSummaryAPIView(APIView):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 # message="An unexpected error occurred while processing the request.",
                 message=str(e),
+            )
+
+
+class ListBranchAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            branches = Branch.objects.select_related("admin").all()
+            return Response(
+                {
+                    "message": "Branches retrieved successfully.",
+                    "data": BranchListSerializer(instance=branches, many=True).data,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return APIErrorResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                message="An unexpected error occurred while processing the request.",
             )
