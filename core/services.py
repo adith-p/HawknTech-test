@@ -102,23 +102,15 @@ class StockTransferService:
                 transfer_entry.save()
                 return transfer_entry
 
+
+class StockSummaryService:
     @staticmethod
-    def filtered_transfered_entries(request):
-        qp = request.query_params
+    def get_stock_summary(branch_id):
+        target_branch = BranchService.get_branch_by_id(branch_id)
+        stock_entries = (
+            Stock.objects.filter(branch=target_branch)
+            .select_related("product")
+            .values_list("product__sku", "product__name", "quantity")
+        )
 
-        from_branch = qp.get("from_branch")
-        to_branch = qp.get("to_branch")
-        product = qp.get("product")
-
-        transfer_entries = StockTransfer.objects.select_related(
-            "from_branch", "to_branch", "product", "requested_by", "approved_by"
-        ).all()
-
-        if from_branch:
-            transfer_entries = transfer_entries.filter(from_branch__code=from_branch)
-        if to_branch:
-            transfer_entries = transfer_entries.filter(to_branch__code=to_branch)
-        if product:
-            transfer_entries = transfer_entries.filter(product__sku=product)
-
-        return transfer_entries
+        return stock_entries

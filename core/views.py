@@ -10,7 +10,7 @@ from .serializers import (
     ApproveStockTransferSerializer,
     StockTransferSerializer,
 )
-from .services import StockTransferService
+from .services import StockTransferService, StockSummaryService
 from .utils import APIErrorResponse
 from .constants import StockTransferStatus
 from rest_framework.pagination import CursorPagination
@@ -123,5 +123,24 @@ class ApproveTransferAPIView(APIView):
 class GetStockSummaryAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        pass
+    def get(self, request, id):
+        try:
+            stock_summary = StockSummaryService.get_stock_summary(id)
+            return Response(
+                {
+                    "message": "Stock summary retrieved successfully.",
+                    "data": stock_summary,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except NotFound as e:
+            return APIErrorResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message=e.detail,
+            )
+        except Exception as e:
+            return APIErrorResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                message="An unexpected error occurred while processing the request.",
+                # message=str(e),
+            )
