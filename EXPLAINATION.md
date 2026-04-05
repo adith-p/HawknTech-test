@@ -1,4 +1,6 @@
-# Thought Process
+# EXPLANATION.md
+
+## Thought Process
 
 I split the project into 2 parts — `api` and `core`. This was to segment the moving parts
 into isolated environments. `api` will handle and route all the URL patterns and endpoints,
@@ -7,7 +9,7 @@ while `core` will handle all the current required endpoint views, serializers, e
 I thought about segmenting them even further but that seemed not required and overkill, so
 I decided to keep it under umbrella apps given the count of the endpoints.
 
-
+---
 
 ## Models
 
@@ -88,7 +90,32 @@ enforced not just by what you are, but by what you own.
 These two levels together make sure that role and ownership are both validated on every
 write operation.
 
+### Idempotency
 
+I did think about implementing explicit idempotency via an idempotency key or a request ID
+header. The initial thought process was to use a middleware that intercepts the request,
+checks for the key, and either caches the response or stores it in the DB so repeated
+requests with the same key return the same result without re-executing the operation.
+
+But I decided against it. It would introduce a fair amount of overhead — middleware,
+caching or DB storage, key management — and for this assessment we only really need to
+cover two endpoints. That complexity felt unjustified.
+
+Instead I handled idempotency at the service layer, which is a cleaner fit here:
+
+- **On transfer creation** — there is a `UniqueConstraint` at the DB model level on
+  `(from_branch, to_branch, product, quantity)` where `transfer_status = PENDING`. So if the same
+  request comes in twice, the second one hits the constraint and gets bounced. No duplicate
+  pending transfers can exist for the same branch–product pair.
+
+- **On transfer approval** — the service layer checks whether the transfer is still
+  `PENDING` before doing anything. If it has already been processed, the request is
+  rejected immediately. So repeated approval attempts on the same transfer are a no-op
+  from the data perspective.
+
+Both of these are enforced at the right layer without any additional infrastructure.
+
+---
 
 ## Transactions, Concurrency & Query Optimization
 
@@ -134,13 +161,7 @@ This change primarily affects the approval logic:
 
 ## Trade-offs & Unfinished Work
 
-**Frontend** — A React frontend was not implemented. The API is fully functional and can
-be consumed by any client. To substitute a visual demo, Swagger/OpenAPI documentation has
-been integrated via `drf-spectacular`, providing an interactive UI to explore and test all
-endpoints directly in the browser at `/api/schema/swagger-ui/`. This also serves as living
-documentation for the API design decisions.
-
-**What I'd add next** — a few things come to mind:
+- The assessment allowed React as an optional extra. I chose to invest my time in backend reliability – transactions, concurrency, tests, and API design – because that’s where the core business logic lives and where I can deliver the most value.
 
 - **Expand the role model to three levels.** Right now we have two roles — `branch_admin`
   and `user`. Going forward I would introduce a third level, something like a global admin
