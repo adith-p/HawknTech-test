@@ -2,7 +2,12 @@ from django.db import models
 import secrets
 import string
 from django.contrib.auth.models import AbstractUser
-from .constants import stock_transfer_status, StockTransferStatus
+from .constants import (
+    stock_transfer_status,
+    StockTransferStatus,
+    transfer_type_choice,
+    TransferType,
+)
 import uuid
 # Create your models here.
 
@@ -47,10 +52,10 @@ class Branch(TimestampedModel):
     )
     admin = models.ForeignKey(User, on_delete=models.CASCADE, related_name="branches")
 
-    def save(self):
+    def save(self, *args, **kwargs):
         if self.code is None:
             self.code = generate_branch_code()
-        super().save()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} ({self.code})"
@@ -62,10 +67,10 @@ class Product(TimestampedModel):
     )
     name = models.CharField(max_length=120)
 
-    def save(self):
+    def save(self, *args, **kwargs):
         if self.sku is None:
             self.sku = generate_sku()
-        super().save()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} ({self.sku})"
@@ -112,3 +117,20 @@ class StockTransfer(TimestampedModel):
         choices=stock_transfer_status,
         default=StockTransferStatus.PENDING,
     )
+    transfer_type = models.CharField(
+        max_length=20,
+        choices=transfer_type_choice,
+        default=TransferType.REQUEST,
+    )
+
+    def __str__(self):
+        return f"{self.product.name} from {self.from_branch.name} to {self.to_branch.name} ({self.quantity})"
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["from_branch", "to_branch", "product"],
+                condition=models.Q(transfer_status=StockTransferStatus.PENDING),
+                name="unique_transfer_pending",
+            )
+        ]

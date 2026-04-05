@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, Serializer
 from .models import Product, Branch, StockTransfer
-from .constants import StockTransferStatus
+from .constants import StockTransferStatus, TransferType
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -19,21 +19,32 @@ class BranchSerializer(ModelSerializer):
         fields = ("code", "name", "admin")
 
 
-class GetStockSummarySerializer(Serializer):
-    Branch = BranchSerializer()
-    catalog = ProductSerializer(many=True)
-
-
 class CreateStockTransferSerializer(Serializer):
     from_branch = serializers.UUIDField()
     to_branch = serializers.UUIDField()
     product_sku = serializers.CharField()
-    quantity = serializers.IntegerField()
+    quantity = serializers.IntegerField(min_value=1)
+    transfer_type = serializers.ChoiceField(
+        choices=[TransferType.OFFER, TransferType.REQUEST],
+    )
 
     def validate_product_sku(self, data):
         if not Product.objects.filter(sku=data).exists():
             raise serializers.ValidationError("Product with this SKU does not exist.")
         return data
+
+    def validate(self, attrs):
+        if attrs["from_branch"] == attrs["to_branch"]:
+            raise serializers.ValidationError(
+                "From and To branches cannot be the same."
+            )
+        return attrs
+
+
+class StockSummarySerializer(Serializer):
+    product_name = serializers.CharField(source="product.name")
+    product_sku = serializers.CharField(source="product.sku")
+    quantity = serializers.IntegerField()
 
 
 class ApproveStockTransferSerializer(Serializer):

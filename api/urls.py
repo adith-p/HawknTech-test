@@ -33,6 +33,6 @@ urlpatterns = [
     path(
         "transfers/<uuid:id>/approve/",
         ApproveTransferAPIView.as_view(),
-        name="stock-summary",
+        name="stock-transfer-approve",
     ),
 ]

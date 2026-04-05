@@ -5,16 +5,19 @@ from rest_framework import status
 from rest_framework.exceptions import NotFound, ValidationError
 from .models import Branch, Product, StockTransfer
 from rest_framework.response import Response
+from django.db import IntegrityError
 from .serializers import (
     CreateStockTransferSerializer,
     ApproveStockTransferSerializer,
     StockTransferSerializer,
+    StockSummarySerializer,
 )
 from .services import StockTransferService, StockSummaryService
 from .utils import APIErrorResponse
 from .constants import StockTransferStatus
 from rest_framework.pagination import CursorPagination
 from rest_framework.permissions import IsAuthenticated
+from .permissions import IsBranchAdmin
 # Create your views here.
 
 
@@ -26,7 +29,8 @@ class StockTransferPagination(CursorPagination):
 
 
 class GetOrCreateTransferViewset(ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    http_method_names = ["get", "post", "head", "options"]
+    permission_classes = [IsAuthenticated, IsBranchAdmin]
     queryset = StockTransfer.objects.select_related(
         "from_branch", "to_branch", "product", "requested_by", "approved_by"
     ).all()
@@ -57,6 +61,16 @@ class GetOrCreateTransferViewset(ModelViewSet):
                 serial_valid=serializer.errors,
                 data=serializer.errors,
             )
+        except ValidationError as e:
+            return APIErrorResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message=e.detail,
+            )
+        except IntegrityError as e:
+            return APIErrorResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message=str(e),
+            )
 
         except NotFound as e:
             return APIErrorResponse(
@@ -72,7 +86,7 @@ class GetOrCreateTransferViewset(ModelViewSet):
 
 
 class ApproveTransferAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsBranchAdmin]
 
     def post(self, request, id):
         try:
@@ -129,7 +143,9 @@ class GetStockSummaryAPIView(APIView):
             return Response(
                 {
                     "message": "Stock summary retrieved successfully.",
-                    "data": stock_summary,
+                    "data": StockSummarySerializer(
+                        instance=stock_summary, many=True
+                    ).data,
                 },
                 status=status.HTTP_200_OK,
             )
@@ -141,6 +157,6 @@ class GetStockSummaryAPIView(APIView):
         except Exception as e:
             return APIErrorResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                message="An unexpected error occurred while processing the request.",
-                # message=str(e),
+                # message="An unexpected error occurred while processing the request.",
+                message=str(e),
             )

@@ -11,3 +11,16 @@ stock_transfer_status = [
     (StockTransferStatus.APPROVED, "approved"),
     (StockTransferStatus.REJECTED, "rejected"),
 ]
+
+
+class TransferType:
+    REQUEST = "REQUEST"
+    OFFER = "OFFER"
+
+    choices = ["REQUEST", "OFFER"]
+
+
+transfer_type_choice = [
+    (TransferType.REQUEST, "request"),
+    (TransferType.OFFER, "offer"),
+]
