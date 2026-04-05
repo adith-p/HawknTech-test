@@ -11,6 +11,27 @@
 - uv — dependency management
 
 ---
+## Endpoints
+ 
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/token/` | Obtain JWT access and refresh tokens |
+| POST | `/api/token/refresh/` | Refresh access token |
+| GET | `/api/branches/` | List all branches |
+| GET | `/api/branches/{id}/stock-summary/` | Stock summary for a branch |
+| GET | `/api/transfers/` | List all transfers (with filters) |
+| POST | `/api/transfers/` | Create a stock transfer |
+| POST | `/api/transfers/{id}/approve/` | Approve or reject a transfer |
+ 
+### Transfer list filters
+ 
+```
+/api/transfers/?transfer_status=PENDING
+/api/transfers/?from_branch__code=BR123ABC
+/api/transfers/?to_branch__code=BR456DEF
+/api/transfers/?product__sku=SKUXXXXXXX
+```
+---
 
 ## Setup
 
