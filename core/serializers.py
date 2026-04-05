@@ -27,8 +27,13 @@ class GetStockSummarySerializer(Serializer):
 class CreateStockTransferSerializer(Serializer):
     from_branch = serializers.UUIDField()
     to_branch = serializers.UUIDField()
-    product_sku = serializers.UUIDField()
+    product_sku = serializers.CharField()
     quantity = serializers.IntegerField()
+
+    def validate_product_sku(self, data):
+        if not Product.objects.filter(sku=data).exists():
+            raise serializers.ValidationError("Product with this SKU does not exist.")
+        return data
 
 
 class ApproveStockTransferSerializer(Serializer):

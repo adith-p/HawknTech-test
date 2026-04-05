@@ -46,6 +46,7 @@ GEN_APPS = [
 
 THIRD_PARTY_APPS = [
     "rest_framework",
+    "django_filters",
 ]
 
 INSTALLED_APPS += GEN_APPS + THIRD_PARTY_APPS

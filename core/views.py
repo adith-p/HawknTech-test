@@ -1,7 +1,9 @@
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.exceptions import NotFound, ValidationError
-from .models import Branch, Product
+from .models import Branch, Product, StockTransfer
 from rest_framework.response import Response
 from .serializers import (
     CreateStockTransferSerializer,
@@ -11,11 +13,33 @@ from .serializers import (
 from .services import StockTransferService
 from .utils import APIErrorResponse
 from .constants import StockTransferStatus
+from rest_framework.pagination import CursorPagination
 # Create your views here.
 
 
-class GetOrCreateTransferAPIView(APIView):
-    def post(self, request):
+class StockTransferPagination(CursorPagination):
+    page_size = 10
+    page_size_query_param = "page_size"
+    max_page_size = 100
+    ordering = "-created_at"
+
+
+class GetOrCreateTransferViewset(ModelViewSet):
+    queryset = StockTransfer.objects.select_related(
+        "from_branch", "to_branch", "product", "requested_by", "approved_by"
+    ).all()
+    serializer_class = StockTransferSerializer
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = [
+        "from_branch__code",
+        "to_branch__code",
+        "product__sku",
+        "transfer_status",
+    ]
+    pagination_class = StockTransferPagination
+
+    def create(self, request):
         try:
             serializer = CreateStockTransferSerializer(data=request.data)
             if serializer.is_valid():
@@ -29,6 +53,7 @@ class GetOrCreateTransferAPIView(APIView):
             return APIErrorResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 serial_valid=serializer.errors,
+                data=serializer.errors,
             )
 
         except NotFound as e:
@@ -36,22 +61,12 @@ class GetOrCreateTransferAPIView(APIView):
                 status_code=status.HTTP_404_NOT_FOUND,
                 message=e.detail,
             )
-        except Exception:
+        except Exception as e:
             return APIErrorResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                message="An unexpected error occurred while processing the request.",
+                # message="An unexpected error occurred while processing the request.",
+                message=str(e),
             )
-
-    def get(self, request):
-        stock_transfers = StockTransferService.filtered_transfered_entries(request)
-        serializer = StockTransferSerializer(stock_transfers, many=True)
-        return Response(
-            {
-                "message": "Stock transfer entries retrieved successfully.",
-                "data": serializer.data,
-            },
-            status=status.HTTP_200_OK,
-        )
 
 
 class ApproveTransferAPIView(APIView):
