@@ -88,17 +88,29 @@ pip install django djangorestframework djangorestframework-simplejwt django-filt
 
 ```bash
 python manage.py migrate
+or 
+uv run manage.py migrate
 ```
 
 ### 4. Seed the database
 
 ```bash
 python manage.py seed
+or
+uv run manage.py seed
+```
+### 5. runserver
+```
+python manage.py runserver
+or
+uv run manage.py runserver
 ```
 
 ## Running Tests
 
 ```bash
 python manage.py test core
+or
+uv run manage.py test core
 ```
 >>>>>>> 01f1dc4 (docs: postman collection)
