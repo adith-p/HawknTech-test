@@ -6,17 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0001_initial'),
+        ("core", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='stocktransfer',
-            name='transfer_type',
-            field=models.CharField(choices=[('REQUEST', 'request'), ('OFFER', 'offer')], default='REQUEST', max_length=20),
+            model_name="stocktransfer",
+            name="transfer_type",
+            field=models.CharField(
+                choices=[("REQUEST", "request"), ("OFFER", "offer")],
+                default="REQUEST",
+                max_length=20,
+            ),
         ),
         migrations.AddConstraint(
-            model_name='stocktransfer',
-            constraint=models.UniqueConstraint(condition=models.Q(('transfer_status', 'PENDING')), fields=('from_branch', 'to_branch', 'product'), name='unique_transfer_pending'),
+            model_name="stocktransfer",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("transfer_status", "PENDING")),
+                fields=("from_branch", "to_branch", "product"),
+                name="unique_transfer_pending",
+            ),
         ),
     ]

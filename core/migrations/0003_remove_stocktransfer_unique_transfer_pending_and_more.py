@@ -6,16 +6,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0002_stocktransfer_transfer_type_and_more'),
+        ("core", "0002_stocktransfer_transfer_type_and_more"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='stocktransfer',
-            name='unique_transfer_pending',
+            model_name="stocktransfer",
+            name="unique_transfer_pending",
         ),
         migrations.AddConstraint(
-            model_name='stocktransfer',
-            constraint=models.UniqueConstraint(condition=models.Q(('transfer_status', 'PENDING')), fields=('from_branch', 'to_branch', 'product', 'transfer_type', 'quantity'), name='unique_transfer_pending'),
+            model_name="stocktransfer",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("transfer_status", "PENDING")),
+                fields=(
+                    "from_branch",
+                    "to_branch",
+                    "product",
+                    "transfer_type",
+                    "quantity",
+                ),
+                name="unique_transfer_pending",
+            ),
         ),
     ]
